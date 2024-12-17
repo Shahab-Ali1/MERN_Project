@@ -1,0 +1,27 @@
+/* GenericButton.module.css */
+.genericButton {
+    padding: 3px 10px;
+    font-size: 12px;
+    border: 1px solid #c2410c;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Hover and Focus States */
+.genericButton:hover {
+    background-color: #c2410c; /* Example hover color */
+    color: white;
+}
+
+.genericButton:focus {
+    outline: none;
+    box-shadow: 0 0 7px #0056b3; /* Example focus effect */
+}
+
+/* Disabled State */
+.genericButton:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}

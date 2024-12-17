@@ -1,0 +1,14 @@
+/* GenericModal.module.css */
+.ant-modal .ant-modal-content {
+    background-color: #c2410c !important; /* Add higher specificity */
+  }
+  /* GenericModal.module.css */
+.customModal .ant-modal-content {
+    /* background-color: #c2410c !important; */
+    background-color: #c2410c !important;
+  }
+  .modalContent{
+    padding: 10px 10px !important;
+  }
+  
+  
