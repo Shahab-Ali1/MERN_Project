@@ -25,14 +25,17 @@ const LoginForm = () => {
             email: formData?.email,
             password: formData?.pwd
         }
+        debugger;
         loginService("/users/login", obj)
             .then((response) => {
+                debugger;
                 if(response?.success){
                     localStorage.setItem("token", JSON.stringify(response.data));
                     navigate("/home");
                     reload();
                 }
             }).catch((error) => {
+                debugger;
                 errorToast(error.message);
             })
 
