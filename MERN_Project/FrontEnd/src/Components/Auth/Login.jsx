@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { reload } from "../../Utils/Functions/Functions";
 import { errorToast, warningToast } from "../../Utils/Toast/Toast";
+import { loginService } from "../../Utils/Service";
 
 
 const LoginForm = () => {
@@ -20,14 +21,23 @@ const LoginForm = () => {
         if (!formData?.email || !formData?.pwd) {
             return warningToast("Email or Password cannot be empty");
         }
-        else if (formData?.email === "admin" && formData?.pwd === "admin") {
-            localStorage.setItem("token", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-            navigate("/home");
-            reload();
+        let obj = {
+            email: formData?.email,
+            password: formData?.pwd
         }
-        else{
-            return errorToast("Please Enter Valid Email or Password");
-        }
+        loginService("/users/login", obj)
+            .then((response) => {
+                if(response?.success){
+                    localStorage.setItem("token", JSON.stringify(response.data));
+                    navigate("/home");
+                    reload();
+                }
+                else{
+                    
+                }
+            }).catch((error) => {
+                errorToast(error.message);
+            })
 
     }
 
