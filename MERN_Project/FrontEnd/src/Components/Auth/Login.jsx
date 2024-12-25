@@ -32,9 +32,6 @@ const LoginForm = () => {
                     navigate("/home");
                     reload();
                 }
-                else{
-                    
-                }
             }).catch((error) => {
                 errorToast(error.message);
             })
