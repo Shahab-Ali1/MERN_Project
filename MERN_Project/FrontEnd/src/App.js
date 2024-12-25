@@ -1,14 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './App.scss';
 import AppRoutes from './Routes/AppRoutes';
 import Layout from './Components/Layout/Layout';
 import AuthRoutes from './Routes/AuthRoutes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useSelector } from 'react-redux';
 
 function App() {
-  
-  const token = localStorage.getItem('token') ? localStorage.getItem('token') : "";
+  const { LoggedInUser } = useSelector(state => state.Auth);
+  const token = LoggedInUser?.accessToken || "";
   return (
     <React.Fragment>
       {token ? (

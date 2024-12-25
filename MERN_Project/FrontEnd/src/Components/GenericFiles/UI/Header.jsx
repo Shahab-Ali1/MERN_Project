@@ -3,20 +3,22 @@ import { Link, NavLink, useNavigate } from 'react-router';
 import { reload } from '../../../Utils/Functions/Functions';
 import { PostService } from '../../../Utils/Service';
 import { errorToast } from '../../../Utils/Toast/Toast';
+import { getUserInfo } from '../../../redux/reducer/Auth/Auth';
+import { useDispatch } from 'react-redux';
 
 export default function Header() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const clickLogout = () => {
         PostService("/users/logout", {})
             .then((response) => {
-                debugger
                 if (response?.success) {
                     localStorage.removeItem('token');
+                    dispatch(getUserInfo({}));
                     navigate("/login");
                     reload();
                 }
             }).catch((error) => {
-                debugger;
                 errorToast(error?.message);
             })
 

@@ -5,11 +5,15 @@ import App from './App';
 import { HashRouter } from 'react-router';
 import "ag-grid-community/styles/ag-grid.css"; // Mandatory CSS required by the Data Grid
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Optional Theme applied to the Data Grid
+import { Provider } from 'react-redux'
+import { store } from './redux/store';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <HashRouter>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>,
   </HashRouter>
 );
 

@@ -3,10 +3,13 @@ import { useNavigate } from "react-router";
 import { reload } from "../../Utils/Functions/Functions";
 import { errorToast, warningToast } from "../../Utils/Toast/Toast";
 import { loginService } from "../../Utils/Service";
+import { useDispatch } from "react-redux";
+import { getUserInfo } from "../../redux/reducer/Auth/Auth";
 
 
 const LoginForm = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [formData, setformData] = useState({ email: "", pwd: "" });
 
     const handleFormData = (event) => {
@@ -25,17 +28,15 @@ const LoginForm = () => {
             email: formData?.email,
             password: formData?.pwd
         }
-        debugger;
         loginService("/users/login", obj)
             .then((response) => {
-                debugger;
-                if(response?.success){
+                if (response?.success) {
                     localStorage.setItem("token", JSON.stringify(response.data));
+                    dispatch(getUserInfo(response.data));
                     navigate("/home");
                     reload();
                 }
             }).catch((error) => {
-                debugger;
                 errorToast(error.message);
             })
 
