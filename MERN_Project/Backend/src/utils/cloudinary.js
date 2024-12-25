@@ -13,7 +13,7 @@ const uploadOnCloudinary = async (localFilePath) => {
             resource_type: "auto",
         }
         );
-        console.log(`Cloudnary RESPONSE ON UTILS ${response.url}`);
+        // fs.unlink(localFilePath);
 
         return response;
     } catch (error) {
