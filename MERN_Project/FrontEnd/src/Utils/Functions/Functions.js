@@ -9,7 +9,7 @@ export const codeError = (error) => {
 export const userInfo = () => {
     if (localStorage.getItem("token")) {
         const { accessToken, ...userobj } = JSON.parse(localStorage.getItem("token"));
-        return { token: accessToken, ...userobj };
+        return { token: accessToken, userobj };
     }
     return false;
 }

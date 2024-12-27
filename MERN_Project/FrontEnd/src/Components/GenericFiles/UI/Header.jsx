@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, NavLink, useNavigate } from 'react-router';
-import { reload } from '../../../Utils/Functions/Functions';
+import { reload, userInfo } from '../../../Utils/Functions/Functions';
 import { PostService } from '../../../Utils/Service';
 import { errorToast } from '../../../Utils/Toast/Toast';
 import { getUserInfo } from '../../../redux/reducer/Auth/Auth';
@@ -10,7 +10,8 @@ export default function Header() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const clickLogout = () => {
-        PostService("/users/logout", {})
+        const { userobj } = userInfo();
+        PostService("/users/logout", { id: userobj._id })
             .then((response) => {
                 if (response?.success) {
                     localStorage.removeItem('token');

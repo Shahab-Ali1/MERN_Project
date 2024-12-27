@@ -6,13 +6,15 @@ import AuthRoutes from './Routes/AuthRoutes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
+import { userInfo } from './Utils/Functions/Functions';
 
 function App() {
+  const { token } = userInfo();
   const { LoggedInUser } = useSelector(state => state.Auth);
-  const token = LoggedInUser?.accessToken || "";
+  const isAuthorized = LoggedInUser?.accessToken || token;
   return (
     <React.Fragment>
-      {token ? (
+      {isAuthorized ? (
         <Layout>
           <AppRoutes />
         </Layout>
