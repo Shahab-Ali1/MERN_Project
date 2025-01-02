@@ -7,18 +7,17 @@ const Sidebar = () => {
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <aside className="bg-white shadow-md hidden sm:block" style={{width: "100%"}}>
+            <aside className="bg-white shadow-md hidden sm:block" style={{ width: "100%" }}>
                 <nav className="mt-4">
                     <ul>
                         {/* Home */}
                         <li className={`p-3 border-b transition duration-300 ${(location.pathname === "/" || location.pathname === "/home") ? "bg-orange-700 text-white" : "hover:bg-orange-300 hover:text-gray-800"}`}>
                             <Link
                                 to="/"
-                                className={`flex items-center space-x-2 ${
-                                    (location.pathname === "/" || location.pathname === "/home")
+                                className={`flex items-center space-x-2 ${(location.pathname === "/" || location.pathname === "/home")
                                         ? "text-white"
                                         : ""
-                                } focus:outline-none`}
+                                    } focus:outline-none`}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -39,14 +38,13 @@ const Sidebar = () => {
                         </li>
 
                         {/* Category */}
-                        <li className={`p-3 border-b transition duration-300 ${location.pathname === "/category"? "bg-orange-700 text-white" : "hover:bg-orange-300 hover:text-gray-800"}`}>
+                        <li className={`p-3 border-b transition duration-300 ${location.pathname === "/category" ? "bg-orange-700 text-white" : "hover:bg-orange-300 hover:text-gray-800"}`}>
                             <Link
                                 to="/category"
-                                className={`flex items-center space-x-2 ${
-                                    location.pathname === "/category"
+                                className={`flex items-center space-x-2 ${location.pathname === "/category"
                                         ? "text-white"
                                         : ""
-                                } focus:outline-none`}
+                                    } focus:outline-none`}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -66,15 +64,41 @@ const Sidebar = () => {
                             </Link>
                         </li>
 
+                        {/* Product */}
+                        <li className={`p-3 border-b transition duration-300 ${location.pathname === "/product" ? "bg-orange-700 text-white" : "hover:bg-orange-300 hover:text-gray-800"}`}>
+                            <Link
+                                to="/product"
+                                className={`flex items-center space-x-2 ${location.pathname === "/product"
+                                        ? "text-white"
+                                        : ""
+                                    } focus:outline-none`}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M3 10h11M9 21V10M12 3H4a2 2 0 00-2 2v16a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-8z"
+                                    />
+                                </svg>
+                                <span>Product</span>
+                            </Link>
+                        </li>
+
                         {/* Contact */}
                         <li className={`p-3 border-b transition duration-300 ${location.pathname === "/contact" ? "bg-orange-700 text-white" : "hover:bg-orange-300 hover:text-gray-800"}`}>
                             <Link
                                 to="/contact"
-                                className={`flex items-center space-x-2 ${
-                                    location.pathname === "/contact"
+                                className={`flex items-center space-x-2 ${location.pathname === "/contact"
                                         ? "text-white"
                                         : ""
-                                } focus:outline-none`}
+                                    } focus:outline-none`}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -98,11 +122,10 @@ const Sidebar = () => {
                         <li className={`p-3 border-b transition duration-300 ${location.pathname === "/about" ? "bg-orange-700 text-white" : "hover:bg-orange-300 hover:text-gray-800"}`}>
                             <Link
                                 to="/about"
-                                className={`flex items-center space-x-2 ${
-                                    location.pathname === "/about"
+                                className={`flex items-center space-x-2 ${location.pathname === "/about"
                                         ? "text-white"
                                         : ""
-                                } focus:outline-none`}
+                                    } focus:outline-none`}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
