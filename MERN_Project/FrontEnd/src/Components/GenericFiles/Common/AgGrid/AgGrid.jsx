@@ -1,7 +1,6 @@
 import React, { useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react';
-function AgGrid({ Data, Columns, onRowClicked }) {
-    const gridRef = useRef(null); // Reference to the grid instance
+function AgGrid({ Data, Columns, onRowClicked, ref }) {
 
     const onFirstDataRendered = (params) => {
         if (Data && Data.length > 0) {
@@ -16,6 +15,7 @@ function AgGrid({ Data, Columns, onRowClicked }) {
                 style={{ height: 200 }}
             >
                 <AgGridReact
+                    ref={ref} // Attach the refrence
                     rowData={Data}
                     columnDefs={Columns}
                     rowSelection={"single"}

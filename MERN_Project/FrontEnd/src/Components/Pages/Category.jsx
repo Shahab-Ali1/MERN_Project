@@ -21,6 +21,7 @@ const Category = () => {
     ]);
     const [formBtn, setformBtn] = useState(false);
     const inputRef = useRef(null)
+    const GridRef = useRef(null)
     const [formData, setFormData] = useState({ ...INITIAL_STATE });
     const [isDisabled, setisDisabled] = useState(true)
     const [rowData, setrowData] = useState([]);
@@ -31,6 +32,9 @@ const Category = () => {
                 .then((response) => {
                     if (response?.success) {
                         setrowData(response?.data);
+                        setTimeout(() => {
+                            setFormData(GridRef.current.api.getSelectedRows()[0])
+                        }, 100);
                     }
                 }).catch((error) => {
                     errorToast(error?.message);
@@ -59,6 +63,7 @@ const Category = () => {
         setformBtn(true);
         setisDisabled(false);
         setFormData({ ...INITIAL_STATE });
+        debugger;
         inputRef.current.focus();
     }
     const clickCloseBtn = () => {
@@ -94,6 +99,7 @@ const Category = () => {
             <h4 className="text-sm font-bold text-gray-800">Category</h4>
             <main className="mt-2">
                 <AgGrid
+                    ref={GridRef}
                     Data={rowData}
                     Columns={columnDefs}
                     onRowClicked={(params) => setFormData(params.data)}
