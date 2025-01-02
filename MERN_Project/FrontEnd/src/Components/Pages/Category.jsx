@@ -1,23 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AgGrid, GenericTextField } from "../SharedComponents/SharedComponents";
+import { ActionModal, AgGrid, GenericTextField } from "../SharedComponents/SharedComponents";
 import GenericButton from "../GenericFiles/Common/Button/Button";
 import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 import { codeError } from "../../Utils/Functions/Functions";
 import { PostService } from "../../Utils/Service";
 import { errorToast, successToast } from "../../Utils/Toast/Toast";
-import FormItemInput from "antd/es/form/FormItemInput";
+import { ModalType } from "../../Utils/Constant/Constant";
 
 const INITIAL_STATE = {
     name: "",
     description: "",
-    status: true
+    status: true,
+    _id: 0
 };
 const Category = () => {
     // Column Definitions: Defines the columns to be displayed.
     const [columnDefs] = useState([
         { headerName: "Name", field: "name", width: 500, },
         { headerName: "Description", field: "description", width: 520 },
-        { headerName: "Status", field: "status", width: 150 },
+        { headerName: "Status", field: "status", width: 150, cellStyle: { textAlign: 'center' }, },
     ]);
     const [formBtn, setformBtn] = useState(false);
     const inputRef = useRef(null)
@@ -25,8 +26,9 @@ const Category = () => {
     const [formData, setFormData] = useState({ ...INITIAL_STATE });
     const [isDisabled, setisDisabled] = useState(true)
     const [rowData, setrowData] = useState([]);
+    const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, msg: "" });
 
-    useEffect(() => {
+    const getCategory = () => {
         try {
             PostService("/categories/getCategory", { status: true })
                 .then((response) => {
@@ -42,7 +44,24 @@ const Category = () => {
         } catch (error) {
             codeError(error);
         }
+    }
+    useEffect(() => {
+        try {
+            getCategory();
+        } catch (error) {
+            codeError(error);
+        }
     }, []);
+
+    const enableField = () => {
+        setformBtn(true);
+        setisDisabled(false);
+    }
+    const disableField = (params) => {
+        setformBtn(false);
+        setisDisabled(true);
+    }
+
 
     const handleFormData = (event) => {
         try {
@@ -60,30 +79,136 @@ const Category = () => {
     }
 
     const clickNewItem = () => {
-        setformBtn(true);
-        setisDisabled(false);
+        enableField();
         setFormData({ ...INITIAL_STATE });
-        debugger;
         inputRef.current.focus();
     }
-    const clickCloseBtn = () => {
-        setformBtn(false);
-        setisDisabled(true);
+
+    const clickEditItem = () => {
+        enableField();
     }
+
+
+    const clickCancelBtn = () => {
+        try {
+            if (GridRef && GridRef.current?.api) {
+                setFormData(GridRef.current.api.getSelectedRows()[0]);
+                disableField();
+            }
+        } catch (error) {
+            codeError(error);
+        }
+    }
+
+    const clickCloseBtn = () => {
+        disableField();
+    }
+
+    const handleUpdate = () => {
+        try {
+            let obj = {
+                categoryId: formData?._id,
+                name: formData.name,
+                description: formData.description,
+                status: formData.status
+            }
+            PostService("/categories/updateCategory", obj)
+                .then((response) => {
+                    if (response?.success) {
+                        successToast("Record Update Successfully");
+                        getCategory();
+                        disableField();
+                        debugger;
+                        setTimeout(() => {
+                            let getrows = GridRef.current.api.getRenderedNodes().map(node => node.data);
+                            let row = getrows.find(x => x._id === response.data._id);
+                            GridRef.current.api.forEachNode((node) => {
+                                if (node.data._id === row._id) {
+                                    node.setSelected(true); // Select the node
+                                }
+                            });
+                            setFormData(row);
+                            debugger;
+                        }, 500);
+                    }
+                }).catch((error) => {
+                    errorToast(error?.message);
+                })
+        } catch (error) {
+            codeError(error);
+        }
+    }
+
     const clickSaveBtn = () => {
         try {
             if (formData.name.trim() === "") {
                 return errorToast("Name is required");
             }
-            let obj = {
-                name: formData.name,
-                description: formData.description,
-                status: formData.status
+            if (formData?._id === 0) {
+                let obj = {
+                    name: formData.name,
+                    description: formData.description,
+                    status: formData.status
+                }
+                PostService("/categories/addCategory", obj)
+                    .then((response) => {
+                        if (response?.success) {
+                            successToast("Record Saved Successfully");
+                            getCategory();
+                            disableField();
+                            debugger;
+                            setTimeout(() => {
+                                let getrows = GridRef.current.api.getRenderedNodes().map(node => node.data);
+                                let row = getrows.find(x => x._id === response.data._id);
+                                GridRef.current.api.forEachNode((node) => {
+                                    if (node.data._id === row._id) {
+                                        node.setSelected(true); // Select the node
+                                    }
+                                });
+                                setFormData(row);
+                                debugger;
+                            }, 500);
+                        }
+                    }).catch((error) => {
+                        errorToast(error?.message);
+                    })
             }
-            PostService("/categories/addCategory", obj)
+            else {
+                handleUpdate()
+            }
+        } catch (error) {
+            codeError(error);
+        }
+    }
+
+    const clickDeleteBtn = () => {
+        try {
+            if (!formData?._id) {
+                return errorToast("Please Select First");
+            }
+            setDeleteConfirmation({ show: true, msg: "Are you sure you want to delete this record?" })
+
+        } catch (error) {
+            codeError(error);
+        }
+    }
+
+    const closeDeleteConfirmation = () => {
+        setDeleteConfirmation({ show: false, msg: "" });
+    }
+
+    const handleDelete = () => {
+        try {
+            closeDeleteConfirmation();
+            let obj = {
+                categoryId: formData?._id,
+            }
+            PostService("/categories/deleteCategory", obj)
                 .then((response) => {
                     if (response?.success) {
-                        successToast("Record Saved Successfully")
+                        successToast("Record Deleted Successfully");
+                        getCategory();
+                        disableField();
                     }
                 }).catch((error) => {
                     errorToast(error?.message);
@@ -94,8 +219,21 @@ const Category = () => {
     }
 
 
+
+
+
     return (
         <div>
+            {deleteConfirmation?.show &&
+                <ActionModal
+                    type={ModalType.confirmation}
+                    message={deleteConfirmation?.msg}
+                    open={deleteConfirmation?.show}
+                    onCancel={closeDeleteConfirmation}
+                    onNo={closeDeleteConfirmation}
+                    onYes={handleDelete}
+                />
+            }
             <h4 className="text-sm font-bold text-gray-800">Category</h4>
             <main className="mt-2">
                 <AgGrid
@@ -112,7 +250,7 @@ const Category = () => {
                             label="Name"
                             onChange={handleFormData}
                             name="name"
-                            value={formData.name}
+                            value={formData?.name}
                             disabled={isDisabled}
                         />
                     </div>
@@ -122,14 +260,14 @@ const Category = () => {
                         label="Description"
                         onChange={handleFormData}
                         name="description"
-                        value={formData.description}
+                        value={formData?.description}
                         multiline={true}
                         rows={4}
                         disabled={isDisabled}
                     />
                     <div className="mt-auto">
                         <FormGroup>
-                            <FormControlLabel control={<Checkbox onChange={handleFormData} name="status" checked={formData.status} value={formData.status} disabled={isDisabled} />} label="Status" />
+                            <FormControlLabel control={<Checkbox onChange={handleFormData} name="status" checked={formData?.status} value={formData?.status} disabled={isDisabled} />} label="Status" />
                         </FormGroup>
                     </div>
                 </div>
@@ -142,9 +280,11 @@ const Category = () => {
                         />
                         <GenericButton
                             text="Edit Item"
+                            onClick={clickEditItem}
                         />
                         <GenericButton
                             text="Delete"
+                            onClick={clickDeleteBtn}
                         />
                         <GenericButton
                             text="Close"
@@ -160,6 +300,7 @@ const Category = () => {
                             />
                             <GenericButton
                                 text="Cancel"
+                                onClick={clickCancelBtn}
                             />
                             <GenericButton
                                 text="Close"
