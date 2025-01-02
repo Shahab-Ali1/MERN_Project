@@ -1,45 +1,91 @@
-import React, { useState } from "react";
-import { ActionModal, AgGrid, GenericModal, GenericTextField } from "../SharedComponents/SharedComponents";
+import React, { useEffect, useRef, useState } from "react";
+import { AgGrid, GenericTextField } from "../SharedComponents/SharedComponents";
 import GenericButton from "../GenericFiles/Common/Button/Button";
-import { successToast } from '../../Utils/Toast/Toast'
-import { ModalType } from "../../Utils/Constant/Constant";
-import axios from 'axios';
+import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
+import { codeError } from "../../Utils/Functions/Functions";
+import { PostService } from "../../Utils/Service";
+import { errorToast, successToast } from "../../Utils/Toast/Toast";
+import FormItemInput from "antd/es/form/FormItemInput";
 
+const INITIAL_STATE = {
+    name: "",
+    description: "",
+    status: true
+};
 const Category = () => {
-    const [rowData] = useState([
-        { make: "Tesla", model: "Model Y", price: 64950, electric: true, otherFields: "any" },
-        { make: "Ford", model: "F-Series", price: 33850, electric: false, otherFields: "any" },
-        { make: "Toyota", model: "Corolla", price: 29600, electric: false, otherFields: "any" },
-        { make: "Tesla", model: "Model Y", price: 64950, electric: true, otherFields: "any" },
-        { make: "Ford", model: "F-Series", price: 33850, electric: false, otherFields: "any" },
-        { make: "Toyota", model: "Corolla", price: 29600, electric: false, otherFields: "any" },
-        { make: "Toyota", model: "Corolla", price: 29600, electric: false, otherFields: "any" },
-    ]);
-
     // Column Definitions: Defines the columns to be displayed.
     const [columnDefs] = useState([
-        { headerName: "A", field: "make", width: 350, },
-        { headerName: "A", field: "model", width: 150 },
-        { headerName: "A", field: "price", width: 150 },
-        { headerName: "A", field: "electric", flex: 1 }
+        { headerName: "Name", field: "name", width: 500, },
+        { headerName: "Description", field: "description", width: 520 },
+        { headerName: "Status", field: "status", width: 150 },
     ]);
-    const [isOpen, setIsOpen] = useState(false);
-    const clickSave = () => {
-        successToast("Record Saved Successfully")
-        setIsOpen(true);
+    const [formBtn, setformBtn] = useState(false);
+    const inputRef = useRef(null)
+    const [formData, setFormData] = useState({ ...INITIAL_STATE });
+    const [isDisabled, setisDisabled] = useState(true)
+    const [rowData, setrowData] = useState([]);
+
+    useEffect(() => {
+        try {
+            PostService("/categories/getCategory", { status: true })
+                .then((response) => {
+                    if (response?.success) {
+                        setrowData(response?.data);
+                    }
+                }).catch((error) => {
+                    errorToast(error?.message);
+                })
+        } catch (error) {
+            codeError(error);
+        }
+    }, []);
+
+    const handleFormData = (event) => {
+        try {
+            const { name, value, type, checked } = event.target;
+            if (type === "checkbox") {
+                setFormData({ ...formData, [name]: checked });
+            }
+            else {
+                setFormData({ ...formData, [name]: value });
+            }
+        } catch (error) {
+            codeError(error);
+
+        }
     }
-    const [isError, setisError] = useState(false)
-    const error = (params) => {
-        setisError(true);
+
+    const clickNewItem = () => {
+        setformBtn(true);
+        setisDisabled(false);
+        setFormData({ ...INITIAL_STATE });
+        inputRef.current.focus();
     }
-    const Api = () => {
-        axios.get("http://localhost:4000/api/users")
-            .then((response) => {
-                console.log(response)
-            })
-            .catch((error) => {
-                console.log(error);
-            })
+    const clickCloseBtn = () => {
+        setformBtn(false);
+        setisDisabled(true);
+    }
+    const clickSaveBtn = () => {
+        try {
+            if (formData.name.trim() === "") {
+                return errorToast("Name is required");
+            }
+            let obj = {
+                name: formData.name,
+                description: formData.description,
+                status: formData.status
+            }
+            PostService("/categories/addCategory", obj)
+                .then((response) => {
+                    if (response?.success) {
+                        successToast("Record Saved Successfully")
+                    }
+                }).catch((error) => {
+                    errorToast(error?.message);
+                })
+        } catch (error) {
+            codeError(error);
+        }
     }
 
 
@@ -50,33 +96,79 @@ const Category = () => {
                 <AgGrid
                     Data={rowData}
                     Columns={columnDefs}
-                    onRowClicked={(params) => console.log("Row clicked:", params.data)}
+                    onRowClicked={(params) => setFormData(params.data)}
                 />
                 {/* </div> */}
-                <div className="grid lg:grid-cols-4 gap-1 mt-4">
+                <div className="grid lg:grid-cols-3 gap-1 mt-4">
                     <div>
                         <GenericTextField
+                            ref={inputRef}
                             label="Name"
+                            onChange={handleFormData}
+                            name="name"
+                            value={formData.name}
+                            disabled={isDisabled}
                         />
                     </div>
-                    <div style={{ backgroundColor: "green" }}>b</div>
-                    <div style={{ backgroundColor: "pink" }}>c</div>
-                    <div style={{ backgroundColor: "yellow" }}>d</div>
                 </div>
-                <GenericButton
-                    text="Save"
-                    onClick={clickSave}
-                />
-                <GenericButton
-                    text="Error Modal"
-                    onClick={error}
-                />
-                <GenericButton
-                    text="Api"
-                    onClick={Api}
-                />
+                <div className="grid lg:grid-cols-3 gap-1 mt-2">
+                    <GenericTextField
+                        label="Description"
+                        onChange={handleFormData}
+                        name="description"
+                        value={formData.description}
+                        multiline={true}
+                        rows={4}
+                        disabled={isDisabled}
+                    />
+                    <div className="mt-auto">
+                        <FormGroup>
+                            <FormControlLabel control={<Checkbox onChange={handleFormData} name="status" checked={formData.status} value={formData.status} disabled={isDisabled} />} label="Status" />
+                        </FormGroup>
+                    </div>
+                </div>
+
+                <div className="mt-8">
+                    {!formBtn ? <span className="flex gap-1">
+                        <GenericButton
+                            text="New Item"
+                            onClick={clickNewItem}
+                        />
+                        <GenericButton
+                            text="Edit Item"
+                        />
+                        <GenericButton
+                            text="Delete"
+                        />
+                        <GenericButton
+                            text="Close"
+                        />
+                    </span> :
+                        <span className="flex gap-1">
+                            <GenericButton
+                                text="New"
+                            />
+                            <GenericButton
+                                text="Save"
+                                onClick={clickSaveBtn}
+                            />
+                            <GenericButton
+                                text="Cancel"
+                            />
+                            <GenericButton
+                                text="Close"
+                                onClick={clickCloseBtn}
+                            />
+                        </span>
+                    }
+                </div>
             </main>
-            {isOpen &&
+
+        </div>
+    );
+};
+
+{/* {isOpen &&
                 <GenericModal
                     title="Basic Modal"
                     open={isOpen}
@@ -106,9 +198,8 @@ const Category = () => {
                     onCancel={() => setisError(false)}
                     onOk={() => setisError(false)}
                 />
-            }
-        </div>
-    );
-};
+            } */}
 
 export default Category;
+
+

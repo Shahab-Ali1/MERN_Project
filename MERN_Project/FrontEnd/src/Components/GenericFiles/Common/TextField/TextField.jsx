@@ -12,6 +12,9 @@ const GenericTextField = ({
     error = false,
     helperText = "",
     disabled = false,
+    rows = null,
+    multiline = false,
+    ref = null,
     ...props
 }) => {
     return (
@@ -27,6 +30,9 @@ const GenericTextField = ({
             helperText={helperText}
             disabled={disabled}
             className={styles?.textField}
+            multiline={multiline}
+            rows={rows}
+            ref={ref}
             {...props}
         />
     );
@@ -40,9 +46,11 @@ GenericTextField.propTypes = {
     variant: PropTypes.oneOf(["outlined", "filled", "standard"]),
     fullWidth: PropTypes.bool,
     error: PropTypes.bool,
+    multiline: PropTypes.bool,
     helperText: PropTypes.string,
     className: PropTypes.string,
-    disabled: PropTypes.bool
+    disabled: PropTypes.bool,
+    rows: PropTypes.number
 };
 
 export default GenericTextField;
