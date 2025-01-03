@@ -9,21 +9,23 @@ import { ModalType } from "../../Utils/Constant/Constant";
 
 
 const INITIAL_STATE = {
+    _id: 0,
     name: "",
     description: "",
+    price: 0,
+    stock: 0,
     status: true,
-    _id: 0,
-    category:""
+    categoryId: ""
 };
 const Product = () => {
     // Column Definitions: Defines the columns to be displayed.
     const [columnDefs] = useState([
-        { headerName: "Name", field: "name", width: 500, },
-        { headerName: "Description", field: "description", width: 520 },
-        { headerName: "Price", field: "price", width: 520 },
-        { headerName: "Stock", field: "stock", width: 520 },
-        { headerName: "Category", field: "category", width: 520 },
-        { headerName: "Status", field: "status", width: 150, cellStyle: { textAlign: 'center' }, },
+        { headerName: "Name", field: "name", width: 300, },
+        { headerName: "Description", field: "description", width: 240 },
+        { headerName: "Price", field: "price", width: 150 },
+        { headerName: "Stock", field: "stock", width: 150 },
+        { headerName: "Category", field: "category", width: 220, valueGetter: (params) => params.data.category?.name || "", },
+        { headerName: "Status", field: "status", width: 100, cellStyle: { textAlign: 'center' }, },
     ]);
     const [formBtn, setformBtn] = useState(false);
     const inputRef = useRef(null)
@@ -32,6 +34,7 @@ const Product = () => {
     const [isDisabled, setisDisabled] = useState(true)
     const [CategoryData, setCategoryData] = useState([]);
     const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, msg: "" });
+    const [dataForGrid, setDataForGrid] = useState([])
 
     const getCategory = () => {
         try {
@@ -50,8 +53,26 @@ const Product = () => {
             codeError(error);
         }
     }
+    const getProduct = () => {
+        try {
+            PostService("/products/getProduct", { status: true })
+                .then((response) => {
+                    if (response?.success) {
+                        setDataForGrid(response?.data);
+                        setTimeout(() => {
+                            setFormData(GridRef.current.api.getSelectedRows()[0])
+                        }, 100);
+                    }
+                }).catch((error) => {
+                    errorToast(error?.message);
+                })
+        } catch (error) {
+            codeError(error);
+        }
+    }
     useEffect(() => {
         try {
+            getProduct();
             getCategory();
         } catch (error) {
             codeError(error);
@@ -67,11 +88,22 @@ const Product = () => {
         setisDisabled(true);
     }
 
+    const onRowClicked = (params) => {
+      try {
+        let data  = {...params.data, categoryId: params.data.category?._id};
+        setFormData(data);
+      } catch (error) {
+        codeError(error);
+        
+      }
+    }
+    
+
 
     const handleFormData = (event) => {
         try {
             const { name, value, type, checked } = event.target;
-            if (type === "checkbox") {
+            if (type && type === "checkbox") {
                 setFormData({ ...formData, [name]: checked });
             }
             else {
@@ -112,18 +144,20 @@ const Product = () => {
     const handleUpdate = () => {
         try {
             let obj = {
-                categoryId: formData?._id,
+                productId: formData._id,
                 name: formData.name,
                 description: formData.description,
-                status: formData.status
+                price: Number(formData.price),
+                stock: Number(formData.stock),
+                status: formData.status,
+                categoryId: formData.categoryId
             }
-            PostService("/categories/updateCategory", obj)
+            PostService("/products/updateProduct", obj)
                 .then((response) => {
                     if (response?.success) {
                         successToast("Record Update Successfully");
-                        getCategory();
+                        getProduct();
                         disableField();
-                        debugger;
                         setTimeout(() => {
                             let getrows = GridRef.current.api.getRenderedNodes().map(node => node.data);
                             let row = getrows.find(x => x._id === response.data._id);
@@ -133,7 +167,6 @@ const Product = () => {
                                 }
                             });
                             setFormData(row);
-                            debugger;
                         }, 500);
                     }
                 }).catch((error) => {
@@ -149,19 +182,30 @@ const Product = () => {
             if (formData.name.trim() === "") {
                 return errorToast("Name is required");
             }
+            else if (formData.price === 0) {
+                return errorToast("Price is required");
+            }
+            else if (formData.stock === 0) {
+                return errorToast("Stock is required");
+            }
+            else if (formData.categoryId.trim() === "") {
+                return errorToast("Category is required");
+            }
             if (formData?._id === 0) {
                 let obj = {
                     name: formData.name,
                     description: formData.description,
-                    status: formData.status
+                    price: Number(formData.price),
+                    stock: Number(formData.stock),
+                    status: formData.status,
+                    categoryId: formData.categoryId
                 }
-                PostService("/categories/addCategory", obj)
+                PostService("/products/addProduct", obj)
                     .then((response) => {
                         if (response?.success) {
                             successToast("Record Saved Successfully");
-                            getCategory();
+                            getProduct();
                             disableField();
-                            debugger;
                             setTimeout(() => {
                                 let getrows = GridRef.current.api.getRenderedNodes().map(node => node.data);
                                 let row = getrows.find(x => x._id === response.data._id);
@@ -171,7 +215,6 @@ const Product = () => {
                                     }
                                 });
                                 setFormData(row);
-                                debugger;
                             }, 500);
                         }
                     }).catch((error) => {
@@ -206,13 +249,13 @@ const Product = () => {
         try {
             closeDeleteConfirmation();
             let obj = {
-                categoryId: formData?._id,
+                productId: formData?._id,
             }
-            PostService("/categories/deleteCategory", obj)
+            PostService("/products/deleteProduct", obj)
                 .then((response) => {
                     if (response?.success) {
                         successToast("Record Deleted Successfully");
-                        getCategory();
+                        getProduct();
                         disableField();
                     }
                 }).catch((error) => {
@@ -243,9 +286,9 @@ const Product = () => {
             <main className="mt-2">
                 <AgGrid
                     ref={GridRef}
-                    // Data={rowData}
+                    Data={dataForGrid}
                     Columns={columnDefs}
-                    onRowClicked={(params) => setFormData(params.data)}
+                    onRowClicked={onRowClicked}
                 />
                 {/* </div> */}
                 <div className="grid lg:grid-cols-3 gap-1 mt-4">
@@ -288,10 +331,13 @@ const Product = () => {
                 <div className="grid lg:grid-cols-3 gap-1 mt-2">
                     <GenericDropdown
                         label="Category"
-                        name="category"
-                        value={formData?.category}
+                        name="categoryId"
+                        value={formData?.categoryId}
                         onChange={handleFormData}
                         options={CategoryData}
+                        valueId={"_id"}
+                        displayValue={"name"}
+                        disabled={isDisabled}
                     />
                 </div>
                 <div className="grid lg:grid-cols-3 gap-1 mt-2">
