@@ -12,6 +12,7 @@
     "antd": "^5.22.4",
     "axios": "^1.7.9",
     "cra-template": "1.2.0",
+    "jqwidgets-scripts": "^20.0.0",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

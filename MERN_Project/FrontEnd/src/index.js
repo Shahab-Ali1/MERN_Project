@@ -5,6 +5,13 @@ import App from './App';
 import { HashRouter } from 'react-router';
 import "ag-grid-community/styles/ag-grid.css"; // Mandatory CSS required by the Data Grid
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Optional Theme applied to the Data Grid
+import "jqwidgets-scripts/jqwidgets/styles/jqx.base.css";
+import "jqwidgets-scripts/jqwidgets/jqxcore";
+import "jqwidgets-scripts/jqwidgets/jqxdata";
+import "jqwidgets-scripts/jqwidgets/jqxgrid";
+import "jqwidgets-scripts/jqwidgets/jqxgrid.sort";
+import "jqwidgets-scripts/jqwidgets/jqxgrid.pager";
+import "jqwidgets-scripts/jqwidgets/jqxgrid.selection";
 import { Provider } from 'react-redux'
 import { store } from './redux/store';
 

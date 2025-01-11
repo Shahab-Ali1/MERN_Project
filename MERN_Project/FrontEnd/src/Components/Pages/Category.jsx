@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { ActionModal, AgGrid, GenericTextField } from "../SharedComponents/SharedComponents";
 import GenericButton from "../GenericFiles/Common/Button/Button";
 import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
@@ -6,6 +6,7 @@ import { codeError } from "../../Utils/Functions/Functions";
 import { PostService } from "../../Utils/Service";
 import { errorToast, successToast } from "../../Utils/Toast/Toast";
 import { ModalType } from "../../Utils/Constant/Constant";
+import JqxGridComponent from "../GenericFiles/Common/JqxGrid/JqxGrid";
 
 const INITIAL_STATE = {
     name: "",
@@ -15,10 +16,16 @@ const INITIAL_STATE = {
 };
 const Category = () => {
     // Column Definitions: Defines the columns to be displayed.
-    const [columnDefs] = useState([
-        { headerName: "Name", field: "name", width: 500, },
-        { headerName: "Description", field: "description", width: 520 },
-        { headerName: "Status", field: "status", width: 150, cellStyle: { textAlign: 'center' }, },
+    const [dataFields] = useState([
+        { name: "_id", type: "string" },
+        { name: "name", type: "string" },
+        { name: "description", type: "string" },
+        { name: "status", type: "string" },
+    ]);
+    const [columns] = useState([
+        { text: "Name", datafield: "name", width: "40%", },
+        { text: "Description", datafield: "description", width: "50%" },
+        { text: "Status", datafield: "status", width: "10%", columnType: "checkbox", align: "center", },
     ]);
     const [formBtn, setformBtn] = useState(false);
     const inputRef = useRef(null)
@@ -35,7 +42,9 @@ const Category = () => {
                     if (response?.success) {
                         setrowData(response?.data);
                         setTimeout(() => {
-                            setFormData(GridRef.current.api.getSelectedRows()[0])
+                            let row = GridRef.current.getrowdata(0);
+                            GridRef.current.selectrow(0)
+                            setFormData(row)
                         }, 100);
                     }
                 }).catch((error) => {
@@ -61,6 +70,13 @@ const Category = () => {
         setformBtn(false);
         setisDisabled(true);
     }
+    
+   const onRowClick = useCallback((params) => {
+    setFormData(params.args.row.bounddata)
+      },
+      [],
+    )
+    
 
 
     const handleFormData = (event) => {
@@ -91,8 +107,9 @@ const Category = () => {
 
     const clickCancelBtn = () => {
         try {
-            if (GridRef && GridRef.current?.api) {
-                setFormData(GridRef.current.api.getSelectedRows()[0]);
+            if (GridRef && GridRef.current) {
+                let selectedRow = GridRef.current.getrowdata(GridRef.current.getselectedrowindex());
+                setFormData(selectedRow);
                 disableField();
             }
         } catch (error) {
@@ -118,17 +135,11 @@ const Category = () => {
                         successToast("Record Update Successfully");
                         getCategory();
                         disableField();
-                        debugger;
                         setTimeout(() => {
-                            let getrows = GridRef.current.api.getRenderedNodes().map(node => node.data);
+                            let getrows = GridRef.current.getrows();
                             let row = getrows.find(x => x._id === response.data._id);
-                            GridRef.current.api.forEachNode((node) => {
-                                if (node.data._id === row._id) {
-                                    node.setSelected(true); // Select the node
-                                }
-                            });
+                            GridRef.current.selectrow(row.uid);
                             setFormData(row);
-                            debugger;
                         }, 500);
                     }
                 }).catch((error) => {
@@ -156,17 +167,11 @@ const Category = () => {
                             successToast("Record Saved Successfully");
                             getCategory();
                             disableField();
-                            debugger;
                             setTimeout(() => {
-                                let getrows = GridRef.current.api.getRenderedNodes().map(node => node.data);
+                                let getrows = GridRef.current.getrows();
                                 let row = getrows.find(x => x._id === response.data._id);
-                                GridRef.current.api.forEachNode((node) => {
-                                    if (node.data._id === row._id) {
-                                        node.setSelected(true); // Select the node
-                                    }
-                                });
+                                GridRef.current.selectrow(row.uid);
                                 setFormData(row);
-                                debugger;
                             }, 500);
                         }
                     }).catch((error) => {
@@ -236,11 +241,19 @@ const Category = () => {
             }
             <h4 className="text-sm font-bold text-gray-800">Category</h4>
             <main className="mt-2">
-                <AgGrid
+                {/* <AgGrid
                     ref={GridRef}
                     Data={rowData}
                     Columns={columnDefs}
                     onRowClicked={(params) => setFormData(params.data)}
+                /> */}
+                <JqxGridComponent
+                    gridRef={GridRef}
+                    data={rowData}
+                    dataFields={dataFields}
+                    columns={columns}
+                    onRowClick={onRowClick}
+                    height={250}
                 />
                 {/* </div> */}
                 <div className="grid lg:grid-cols-3 gap-1 mt-4">

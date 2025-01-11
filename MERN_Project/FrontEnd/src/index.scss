@@ -36,3 +36,10 @@ body {
  .justifyEnd{
   justify-content: end !important;
  }
+ 
+ .jqx-fill-state-pressed {
+  box-sizing: content-box !important;
+  border-color: #999 !important;
+  background-color: #c2410c !important;
+  color: white !important;
+}
