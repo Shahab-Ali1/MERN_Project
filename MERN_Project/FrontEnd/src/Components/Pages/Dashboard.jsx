@@ -1,11 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { codeError } from "../../Utils/Functions/Functions";
+import { getService } from "../../Utils/Service";
+import { errorToast } from "../../Utils/Toast/Toast";
 
 const Dashboard = () => {
+    const [Data, setData] = useState({});
+    const getDashboardStats = () => {
+        try {
+            getService("/dashboard/getDashboard")
+                .then((response) => {
+                    if (response?.data?.success) {
+                        setData(response?.data?.data);
+                    }
+                }).catch((error) => {
+                    errorToast(error?.message);
+                })
+        } catch (error) {
+            codeError(error);
+        }
+    }
+    useEffect(() => {
+        getDashboardStats();
+    }, [])
+
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Header */}
             <header className="bg-white shadow py-4 px-6 flex justify-between items-center">
-                <h1 className="text-xl font-bold text-gray-800">Bakery Dashboard</h1>
+                <h1 className="text-xl font-bold text-gray-800">Dashboard</h1>
             </header>
 
             {/* Main Content */}
@@ -15,17 +37,17 @@ const Dashboard = () => {
                     {/* Card 1 */}
                     <div className="bg-white shadow rounded-lg p-6">
                         <h2 className="text-lg font-semibold text-gray-700">Total Categories</h2>
-                        <p className="text-3xl font-bold text-gray-900 mt-4">12</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-4">{Data?.totalCategory}</p>
                     </div>
                     {/* Card 2 */}
                     <div className="bg-white shadow rounded-lg p-6">
                         <h2 className="text-lg font-semibold text-gray-700">Total Products</h2>
-                        <p className="text-3xl font-bold text-gray-900 mt-4">150</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-4">{Data?.totalProduct}</p>
                     </div>
                     {/* Card 3 */}
                     <div className="bg-white shadow rounded-lg p-6">
                         <h2 className="text-lg font-semibold text-gray-700">Low Stock Items</h2>
-                        <p className="text-3xl font-bold text-red-600 mt-4">5</p>
+                        <p className="text-3xl font-bold text-red-600 mt-4">{Data?.lowStockItems ?? 0}</p>
                     </div>
                 </div>
 
