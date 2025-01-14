@@ -36,6 +36,31 @@ const Sidebar = () => {
                                 <span>Home</span>
                             </Link>
                         </li>
+                        <li className={`p-3 border-b transition duration-300 ${(location.pathname === "/sales") ? "bg-orange-700 text-white" : "hover:bg-orange-300 hover:text-gray-800"}`}>
+                            <Link
+                                to="/sales"
+                                className={`flex items-center space-x-2 ${(location.pathname === "/sales")
+                                        ? "text-white"
+                                        : ""
+                                    } focus:outline-none`}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M3 10h11M9 21V10M12 3H4a2 2 0 00-2 2v16a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-8z"
+                                    />
+                                </svg>
+                                <span>Sales</span>
+                            </Link>
+                        </li>
 
                         {/* Category */}
                         <li className={`p-3 border-b transition duration-300 ${location.pathname === "/category" ? "bg-orange-700 text-white" : "hover:bg-orange-300 hover:text-gray-800"}`}>

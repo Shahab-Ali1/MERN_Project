@@ -5,6 +5,7 @@ import About from '../Components/Pages/About';
 import Dashboard from '../Components/Pages/Dashboard';
 import Category from '../Components/Pages/Category';
 import Product from '../Components/Pages/Product';
+import SalesComponent from '../Components/Pages/Sales';
 
 const Contact = (params) => {
     return <h1>Contact Component Renderer</h1>
@@ -19,6 +20,7 @@ export default function AppRoutes() {
             <Route path="/product" element={<Product />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/sales" element={<SalesComponent />} />
             {/* Page Not Found */}
             <Route exact path="*" element={<PageNotFound />} />
         </Routes>
