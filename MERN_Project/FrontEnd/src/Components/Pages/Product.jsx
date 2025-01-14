@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActionModal, AgGrid, GenericDropdown, GenericTextField } from "../SharedComponents/SharedComponents";
 import GenericButton from "../GenericFiles/Common/Button/Button";
 import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
@@ -6,7 +6,7 @@ import { codeError } from "../../Utils/Functions/Functions";
 import { PostService } from "../../Utils/Service";
 import { errorToast, successToast } from "../../Utils/Toast/Toast";
 import { ModalType } from "../../Utils/Constant/Constant";
-
+import JqxGridComponent from "../GenericFiles/Common/JqxGrid/JqxGrid";
 
 const INITIAL_STATE = {
     _id: 0,
@@ -19,13 +19,37 @@ const INITIAL_STATE = {
 };
 const Product = () => {
     // Column Definitions: Defines the columns to be displayed.
-    const [columnDefs] = useState([
-        { headerName: "Name", field: "name", width: 300, },
-        { headerName: "Description", field: "description", width: 240 },
-        { headerName: "Price", field: "price", width: 150 },
-        { headerName: "Stock", field: "stock", width: 150 },
-        { headerName: "Category", field: "category", width: 220, valueGetter: (params) => params.data.category?.name || "", },
-        { headerName: "Status", field: "status", width: 100, cellStyle: { textAlign: 'center' }, },
+    const [dataFields] = useState([
+        { name: "_id", type: "string" },
+        { name: "name", type: "string" },
+        { name: "description", type: "string" },
+        { name: "price", type: "string" },
+        { name: "stock", type: "string" },
+        { name: "category", type: "string" },
+        { name: "status", type: "string" },
+    ]);
+    // const [columnDefs] = useState([
+    //     { headerName: "Name", field: "name", width: 300, },
+    //     { headerName: "Description", field: "description", width: 240 },
+    //     { headerName: "Price", field: "price", width: 150 },
+    //     { headerName: "Stock", field: "stock", width: 150 },
+    //     { headerName: "Category", field: "category", width: 220, valueGetter: (params) => params.data.category?.name || "", },
+    //     { headerName: "Status", field: "status", width: 100, cellStyle: { textAlign: 'center' }, },
+    // ]);
+    const [columns] = useState([
+        { text: "Name", datafield: "name", width: "30%", },
+        { text: "Description", datafield: "description", width: "25%" },
+        { text: "Price", datafield: "price", width: "15%" },
+        { text: "Stock", datafield: "stock", width: "15%" },
+        {
+            text: "Category", datafield: "category", width: "10%",
+            cellsrenderer: (row, column, value) => value?.name || "",
+            //     {
+            //     debugger;
+            //     return <span>{value?.name || ""}</span>
+            // },
+        },
+        { text: "Status", datafield: "status", width: "5%", columnType: "checkbox", align: "center", },
     ]);
     const [formBtn, setformBtn] = useState(false);
     const inputRef = useRef(null)
@@ -42,9 +66,6 @@ const Product = () => {
                 .then((response) => {
                     if (response?.success) {
                         setCategoryData(response?.data);
-                        setTimeout(() => {
-                            setFormData(GridRef.current.api.getSelectedRows()[0])
-                        }, 100);
                     }
                 }).catch((error) => {
                     errorToast(error?.message);
@@ -60,7 +81,10 @@ const Product = () => {
                     if (response?.success) {
                         setDataForGrid(response?.data);
                         setTimeout(() => {
-                            setFormData(GridRef.current.api.getSelectedRows()[0])
+                            debugger;
+                            let row = GridRef?.current?.getrowdata(0);
+                            GridRef.current.selectrow(0);
+                            setFormData(row)
                         }, 100);
                     }
                 }).catch((error) => {
@@ -88,16 +112,13 @@ const Product = () => {
         setisDisabled(true);
     }
 
-    const onRowClicked = (params) => {
-      try {
-        let data  = {...params.data, categoryId: params.data.category?._id};
+    const onRowClicked = useCallback((params) => {
+        let data = { ...params.args.row.bounddata, categoryId: params.args.row.bounddata.category?._id };
         setFormData(data);
-      } catch (error) {
-        codeError(error);
-        
-      }
-    }
-    
+    },
+        [],
+    )
+
 
 
     const handleFormData = (event) => {
@@ -128,8 +149,9 @@ const Product = () => {
 
     const clickCancelBtn = () => {
         try {
-            if (GridRef && GridRef.current?.api) {
-                setFormData(GridRef.current.api.getSelectedRows()[0]);
+            if (GridRef && GridRef.current) {
+                let selectedRow = GridRef.current.getrowdata(GridRef.current.getselectedrowindex());
+                setFormData(selectedRow);
                 disableField();
             }
         } catch (error) {
@@ -284,11 +306,19 @@ const Product = () => {
             }
             <h4 className="text-sm font-bold text-gray-800">Product</h4>
             <main className="mt-2">
-                <AgGrid
+                {/* <AgGrid
                     ref={GridRef}
                     Data={dataForGrid}
                     Columns={columnDefs}
                     onRowClicked={onRowClicked}
+                /> */}
+                <JqxGridComponent
+                    gridRef={GridRef}
+                    data={dataForGrid}
+                    dataFields={dataFields}
+                    columns={columns}
+                    onRowClick={onRowClicked}
+                    height={250}
                 />
                 {/* </div> */}
                 <div className="grid lg:grid-cols-3 gap-1 mt-4">
